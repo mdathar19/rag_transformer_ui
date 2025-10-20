@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/test/rag_transformer/**)",
+      "Bash(npm install -D tailwindcss postcss autoprefixer)",
+      "Bash(npx tailwindcss init -p)",
+      "Bash(npm install -D @tailwindcss/typography)",
+      "Bash(cat package.json)",
+      "Read(//c/**)",
+      "Bash(cat \"C:\\test\\RunIt\\server\\.env\")",
+      "Bash(npm install react-hook-form)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

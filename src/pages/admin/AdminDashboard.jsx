@@ -1,8 +1,8 @@
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { ThemeToggle } from '../components/ThemeToggle';
-import { Websites } from './WebsitesEnhanced';
-import { Chat } from './Chat';
+import { useAuth } from '../../contexts/AuthContext';
+import { ThemeToggle } from '../../components/ThemeToggle';
+import { AdminWebsites } from './AdminWebsites';
+import { AdminChat } from './AdminChat';
 import {
   LayoutDashboard,
   Globe,
@@ -10,10 +10,11 @@ import {
   Settings,
   LogOut,
   User,
-  Sparkles
+  Sparkles,
+  Users
 } from 'lucide-react';
 
-function DashboardLayout({ children }) {
+function AdminDashboardLayout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,10 +25,11 @@ function DashboardLayout({ children }) {
   };
 
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Overview', path: '/dashboard' },
-    { icon: Globe, label: 'Websites', path: '/dashboard/websites' },
-    { icon: MessageSquare, label: 'Query & Chat', path: '/dashboard/query' },
-    { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
+    { icon: LayoutDashboard, label: 'Overview', path: '/admin/dashboard' },
+    { icon: Globe, label: 'All Websites', path: '/admin/dashboard/websites' },
+    { icon: Users, label: 'Users', path: '/admin/dashboard/users' },
+    { icon: MessageSquare, label: 'Query & Chat', path: '/admin/dashboard/query' },
+    { icon: Settings, label: 'Settings', path: '/admin/dashboard/settings' },
   ];
 
   return (
@@ -41,10 +43,8 @@ function DashboardLayout({ children }) {
               <Sparkles size={24} color="white" />
             </div>
             <div>
-              <p className="text-base font-bold text-gray-900 dark:text-white font-saira">RAG Platform</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {user?.userType === 'ADMIN' ? 'Admin' : 'User'}
-              </p>
+              <p className="text-base font-bold text-gray-900 dark:text-white font-saira">RunIt LAB</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Admin Portal</p>
             </div>
           </div>
 
@@ -87,7 +87,7 @@ function DashboardLayout({ children }) {
                   {user?.companyName}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                  {user?.email}
+                  Admin
                 </p>
               </div>
             </div>
@@ -109,9 +109,9 @@ function DashboardLayout({ children }) {
         <header className="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 flex items-center justify-between sticky top-0 z-10">
           <div>
             <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-0.5 font-saira">
-              Welcome, {user?.companyName}!
+              Admin Dashboard
             </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Broker ID: {user?.brokerId}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Manage all users and websites</p>
           </div>
           <ThemeToggle />
         </header>
@@ -125,16 +125,17 @@ function DashboardLayout({ children }) {
   );
 }
 
-function Overview() {
+function AdminOverview() {
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 font-saira">Dashboard Overview</h2>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 font-saira">Admin Overview</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
         {[
-          { label: 'Websites', value: '0', color: 'primary' },
-          { label: 'Total Queries', value: '0', color: 'violet' },
-          { label: 'Crawled Pages', value: '0', color: 'purple' },
+          { label: 'Total Users', value: '0', color: 'primary' },
+          { label: 'Total Websites', value: '0', color: 'violet' },
+          { label: 'Total Queries', value: '0', color: 'purple' },
+          { label: 'Crawled Pages', value: '0', color: 'blue' },
         ].map((stat) => (
           <div key={stat.label} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex flex-col gap-2">
@@ -147,34 +148,56 @@ function Overview() {
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
         <div className="flex flex-col items-center gap-4 text-center">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white font-saira">Get Started</h3>
-          <p className="text-gray-600 dark:text-gray-400">
-            Add your first website to start crawling and querying content
+          <Sparkles size={48} className="text-primary-600 dark:text-primary-400" />
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white font-saira">Admin Portal</h3>
+          <p className="text-gray-600 dark:text-gray-400 max-w-md">
+            Manage all users, websites, and system settings from this dashboard
           </p>
-          <Link to="/dashboard/websites">
-            <button className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-              Add Website
-            </button>
-          </Link>
+          <div className="flex gap-3">
+            <Link to="/admin/dashboard/websites">
+              <button className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">
+                View All Websites
+              </button>
+            </Link>
+            <Link to="/admin/dashboard/users">
+              <button className="px-6 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors">
+                Manage Users
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function SettingsPage() {
+function AdminUsersPage() {
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-6">
+        <Users size={32} className="text-gray-900 dark:text-white" />
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white font-saira">User Management</h2>
+      </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
+        <p className="text-gray-600 dark:text-gray-400">User management coming soon...</p>
+      </div>
+    </div>
+  );
+}
+
+function AdminSettingsPage() {
   const { user } = useAuth();
 
   return (
     <div className="max-w-3xl">
       <div className="flex items-center gap-2 mb-6">
         <Settings size={32} className="text-gray-900 dark:text-white" />
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white font-saira">Settings</h2>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white font-saira">Admin Settings</h2>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-5">
         <div className="flex flex-col gap-4">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white font-saira">Account Information</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-white font-saira">Admin Account</h3>
           <div className="grid grid-cols-1 gap-4">
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Company Name</p>
@@ -191,28 +214,8 @@ function SettingsPage() {
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Account Type</p>
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300">
-                {user?.userType}
+                ADMIN
               </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-        <div className="flex flex-col gap-4">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white font-saira">Subscription</h3>
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Plan</p>
-              <p className="text-base text-gray-900 dark:text-white capitalize">
-                {user?.subscription?.plan || 'Free'}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Max API Calls</p>
-              <p className="text-base text-gray-900 dark:text-white">
-                {user?.subscription?.maxApiCalls?.toLocaleString() || 'Unlimited'}
-              </p>
             </div>
           </div>
         </div>
@@ -221,15 +224,16 @@ function SettingsPage() {
   );
 }
 
-export function Dashboard() {
+export function AdminDashboard() {
   return (
-    <DashboardLayout>
+    <AdminDashboardLayout>
       <Routes>
-        <Route path="/" element={<Overview />} />
-        <Route path="/websites" element={<Websites />} />
-        <Route path="/query" element={<Chat />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/" element={<AdminOverview />} />
+        <Route path="/websites" element={<AdminWebsites />} />
+        <Route path="/users" element={<AdminUsersPage />} />
+        <Route path="/query" element={<AdminChat />} />
+        <Route path="/settings" element={<AdminSettingsPage />} />
       </Routes>
-    </DashboardLayout>
+    </AdminDashboardLayout>
   );
 }

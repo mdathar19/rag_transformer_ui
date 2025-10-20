@@ -1,14 +1,16 @@
 import apiClient from './client';
 
 export const authAPI = {
-  register: (data) => apiClient.post('/auth/register', data),
+  // OTP-only authentication endpoints
+  requestLoginOTP: (email) => apiClient.post('/auth/request-login-otp', { email }),
 
-  login: (data) => apiClient.post('/auth/login', data),
+  requestSignupOTP: (data) => apiClient.post('/auth/request-signup-otp', data),
 
-  requestOTP: (email) => apiClient.post('/auth/request-otp', { email }),
+  verifyLoginOTP: (email, otp) => apiClient.post('/auth/verify-login-otp', { email, otp }),
 
-  verifyOTP: (email, otp) => apiClient.post('/auth/verify-otp', { email, otp }),
+  verifySignupOTP: (email, otp) => apiClient.post('/auth/verify-signup-otp', { email, otp }),
 
+  // Token and profile endpoints
   verify: (token) => apiClient.get('/auth/verify', {
     headers: { Authorization: `Bearer ${token}` }
   }),
@@ -16,8 +18,6 @@ export const authAPI = {
   getProfile: () => apiClient.get('/auth/profile'),
 
   updateProfile: (data) => apiClient.put('/auth/profile', data),
-
-  changePassword: (data) => apiClient.post('/auth/change-password', data),
 
   generateApiKey: (keyName) => apiClient.post('/auth/api-key', { keyName }),
 };

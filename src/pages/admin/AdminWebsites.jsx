@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { clientsAPI, crawlAPI } from '../api/clients';
-import { Loading, LoadingSpinner } from '../components/Loading';
-import { Globe, Plus, Trash2, RefreshCw, ExternalLink, Calendar, FileText, X } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { adminWebsitesAPI, adminCrawlAPI, getAdminCrawlLogsUrl } from '../../api/adminAPI';
+import { Loading, LoadingSpinner } from '../../components/Loading';
+import { CrawlLogViewer } from '../../components/CrawlLogViewer';
+import { Globe, Plus, Trash2, RefreshCw, ExternalLink, Calendar, FileText, X, Edit } from 'lucide-react';
 
-export function Websites() {
-  const { user } = useAuth();
+export function AdminWebsites() {
+  const { user, token } = useAuth();
   const [websites, setWebsites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingWebsite, setEditingWebsite] = useState(null);
+  const [showLogs, setShowLogs] = useState({});
   const [formData, setFormData] = useState({
     name: '',
     domain: '',
@@ -43,7 +46,7 @@ export function Websites() {
   const loadWebsites = async () => {
     try {
       setLoading(true);
-      const response = await clientsAPI.list();
+      const response = await adminWebsitesAPI.list();
       setWebsites(response.data.clients || []);
     } catch (err) {
       console.error('Failed to load websites:', err);
@@ -77,6 +80,7 @@ export function Websites() {
     setAllowedPathInput('');
     setExcludedPathInput('');
     setTagInput('');
+    setEditingWebsite(null);
   };
 
   const handleAddWebsite = async (e) => {
@@ -89,7 +93,6 @@ export function Websites() {
 
       const submitData = {
         ...formData,
-        brokerId: `WEB${Date.now()}`,
       };
 
       if (filteredDomains.length === 0) {
@@ -98,16 +101,50 @@ export function Websites() {
         submitData.domains = filteredDomains;
       }
 
-      await clientsAPI.create(submitData);
+      if (editingWebsite) {
+        // Update existing website
+        await adminWebsitesAPI.update(editingWebsite.brokerId, submitData);
+      } else {
+        // Create new website
+        submitData.brokerId = `WEB${Date.now()}`;
+        await adminWebsitesAPI.create(submitData);
+      }
 
       setShowAddForm(false);
       resetForm();
       await loadWebsites();
     } catch (err) {
-      setError(err.error || 'Failed to add website');
+      setError(err.error || `Failed to ${editingWebsite ? 'update' : 'add'} website`);
     } finally {
       setFormLoading(false);
     }
+  };
+
+  const handleEdit = (website) => {
+    setEditingWebsite(website);
+    setFormData({
+      name: website.name || '',
+      domain: website.domain || '',
+      baseUrl: website.baseUrl || '',
+      domains: website.domains && website.domains.length > 0
+        ? website.domains
+        : [{ url: '', type: 'main', specificPages: [], crawlSettings: {} }],
+      crawlSettings: {
+        maxPages: website.crawlSettings?.maxPages || 100,
+        crawlDelay: website.crawlSettings?.crawlDelay || 1000,
+        respectRobots: website.crawlSettings?.respectRobots ?? true,
+        allowedPaths: website.crawlSettings?.allowedPaths || [],
+        excludedPaths: website.crawlSettings?.excludedPaths || ['/admin', '/api', '/private'],
+        userAgent: website.crawlSettings?.userAgent || 'RAG-Bot/1.0'
+      },
+      metadata: {
+        industry: website.metadata?.industry || '',
+        description: website.metadata?.description || '',
+        tags: website.metadata?.tags || []
+      },
+      noDataResponse: website.noDataResponse || ''
+    });
+    setShowAddForm(true);
   };
 
   const handleDeleteWebsite = async (brokerId) => {
@@ -116,7 +153,7 @@ export function Websites() {
     }
 
     try {
-      await clientsAPI.delete(brokerId);
+      await adminWebsitesAPI.delete(brokerId);
       await loadWebsites();
     } catch (err) {
       setError(err.error || 'Failed to delete website');
@@ -126,10 +163,16 @@ export function Websites() {
   const handleStartCrawl = async (brokerId) => {
     try {
       setError('');
-      const response = await crawlAPI.start(brokerId, {});
+      const response = await adminCrawlAPI.start(brokerId, {});
       setCrawlJobs(prev => ({
         ...prev,
         [brokerId]: response.data.jobId
+      }));
+
+      // Automatically show logs when crawl starts
+      setShowLogs(prev => ({
+        ...prev,
+        [brokerId]: true
       }));
 
       pollCrawlStatus(response.data.jobId, brokerId);
@@ -141,7 +184,7 @@ export function Websites() {
   const pollCrawlStatus = async (jobId, brokerId) => {
     const interval = setInterval(async () => {
       try {
-        const response = await crawlAPI.getStatus(jobId);
+        const response = await adminCrawlAPI.getStatus(jobId);
         if (response.data.status === 'completed' || response.data.status === 'failed') {
           clearInterval(interval);
           setCrawlJobs(prev => {
@@ -279,7 +322,9 @@ export function Websites() {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <form onSubmit={handleAddWebsite} className="flex flex-col gap-6">
             <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 font-saira">Add New Website</h3>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 font-saira">
+                {editingWebsite ? 'Edit Website' : 'Add New Website'}
+              </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">Configure your website and crawler settings</p>
             </div>
 
@@ -605,7 +650,10 @@ export function Websites() {
                 className="flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 dark:disabled:bg-gray-600 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
               >
                 {formLoading && <LoadingSpinner size="sm" />}
-                {formLoading ? 'Adding...' : 'Add Website'}
+                {formLoading
+                  ? (editingWebsite ? 'Updating...' : 'Adding...')
+                  : (editingWebsite ? 'Update Website' : 'Add Website')
+                }
               </button>
             </div>
           </form>
@@ -655,16 +703,28 @@ export function Websites() {
                   </div>
                   <div className="flex gap-2">
                     <button
+                      onClick={() => handleEdit(website)}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium rounded-lg border border-blue-200 dark:border-blue-800 transition-colors"
+                    >
+                      <Edit size={16} />
+                      <span className="text-sm font-medium">Edit</span>
+                    </button>
+                    <button
                       onClick={() => handleStartCrawl(website.brokerId)}
                       disabled={!!crawlJobs[website.brokerId]}
                       className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 disabled:opacity-50 text-gray-700 dark:text-gray-200 font-medium rounded-lg border border-gray-300 dark:border-gray-600 transition-colors"
                     >
                       {crawlJobs[website.brokerId] ? (
-                        <LoadingSpinner size="sm" />
+                        <>
+                          <LoadingSpinner size="sm" />
+                          <span className="text-sm font-medium">Crawling...</span>
+                        </>
                       ) : (
-                        <RefreshCw size={16} />
+                        <>
+                          <RefreshCw size={16} />
+                          <span className="text-sm font-medium">CRAWL</span>
+                        </>
                       )}
-                      {crawlJobs[website.brokerId] ? 'Crawling...' : 'Crawl'}
                     </button>
                     <button
                       onClick={() => handleDeleteWebsite(website.brokerId)}
@@ -720,6 +780,14 @@ export function Websites() {
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Description</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">{website.metadata.description}</p>
                   </div>
+                )}
+
+                {/* Crawl Log Viewer */}
+                {showLogs[website.brokerId] && crawlJobs[website.brokerId] && (
+                  <CrawlLogViewer
+                    logsUrl={getAdminCrawlLogsUrl(crawlJobs[website.brokerId], token)}
+                    onClose={() => setShowLogs(prev => ({ ...prev, [website.brokerId]: false }))}
+                  />
                 )}
               </div>
             </div>

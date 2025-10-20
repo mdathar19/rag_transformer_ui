@@ -9,6 +9,9 @@ const apiClient = axios.create({
   },
 });
 
+// Export API_BASE_URL for use in EventSource (SSE)
+export { API_BASE_URL };
+
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {

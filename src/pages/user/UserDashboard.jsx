@@ -1,8 +1,8 @@
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { ThemeToggle } from '../components/ThemeToggle';
-import { Websites } from './WebsitesEnhanced';
-import { Chat } from './Chat';
+import { useAuth } from '../../contexts/AuthContext';
+import { ThemeToggle } from '../../components/ThemeToggle';
+import { UserWebsites } from './UserWebsites';
+import { UserChat } from './UserChat';
 import {
   LayoutDashboard,
   Globe,
@@ -13,7 +13,7 @@ import {
   Sparkles
 } from 'lucide-react';
 
-function DashboardLayout({ children }) {
+function UserDashboardLayout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,10 +24,10 @@ function DashboardLayout({ children }) {
   };
 
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Overview', path: '/dashboard' },
-    { icon: Globe, label: 'Websites', path: '/dashboard/websites' },
-    { icon: MessageSquare, label: 'Query & Chat', path: '/dashboard/query' },
-    { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
+    { icon: LayoutDashboard, label: 'Overview', path: '/user/dashboard' },
+    { icon: Globe, label: 'My Websites', path: '/user/dashboard/websites' },
+    { icon: MessageSquare, label: 'Chat', path: '/user/dashboard/chat' },
+    { icon: Settings, label: 'Settings', path: '/user/dashboard/settings' },
   ];
 
   return (
@@ -37,14 +37,12 @@ function DashboardLayout({ children }) {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-md">
-              <Sparkles size={24} color="white" />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center">
+              <img src="/favicon_io/android-chrome-192x192.png" alt="RunIt Logo" className="w-10 h-10" />
             </div>
             <div>
-              <p className="text-base font-bold text-gray-900 dark:text-white font-saira">RAG Platform</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {user?.userType === 'ADMIN' ? 'Admin' : 'User'}
-              </p>
+              <p className="text-base font-bold text-gray-900 dark:text-white font-saira">RunIt LAB</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">User Portal</p>
             </div>
           </div>
 
@@ -111,7 +109,7 @@ function DashboardLayout({ children }) {
             <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-0.5 font-saira">
               Welcome, {user?.companyName}!
             </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Broker ID: {user?.brokerId}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">My Workspace</p>
           </div>
           <ThemeToggle />
         </header>
@@ -125,15 +123,17 @@ function DashboardLayout({ children }) {
   );
 }
 
-function Overview() {
+function UserOverview() {
+  const { user } = useAuth();
+
   return (
     <div>
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 font-saira">Dashboard Overview</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
         {[
-          { label: 'Websites', value: '0', color: 'primary' },
-          { label: 'Total Queries', value: '0', color: 'violet' },
+          { label: 'My Websites', value: '0', color: 'primary' },
+          { label: 'My Queries', value: '0', color: 'violet' },
           { label: 'Crawled Pages', value: '0', color: 'purple' },
         ].map((stat) => (
           <div key={stat.label} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -147,13 +147,14 @@ function Overview() {
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
         <div className="flex flex-col items-center gap-4 text-center">
+          <Sparkles size={48} className="text-primary-600 dark:text-primary-400" />
           <h3 className="text-xl font-bold text-gray-900 dark:text-white font-saira">Get Started</h3>
-          <p className="text-gray-600 dark:text-gray-400">
-            Add your first website to start crawling and querying content
+          <p className="text-gray-600 dark:text-gray-400 max-w-md">
+            Add your first website to start building your AI-powered knowledge base
           </p>
-          <Link to="/dashboard/websites">
+          <Link to="/user/dashboard/websites">
             <button className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-              Add Website
+              Add My First Website
             </button>
           </Link>
         </div>
@@ -162,7 +163,7 @@ function Overview() {
   );
 }
 
-function SettingsPage() {
+function UserSettingsPage() {
   const { user } = useAuth();
 
   return (
@@ -185,14 +186,8 @@ function SettingsPage() {
               <p className="text-base text-gray-900 dark:text-white">{user?.email}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Broker ID</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Account ID</p>
               <p className="text-base text-gray-900 dark:text-white font-mono">{user?.brokerId}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Account Type</p>
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300">
-                {user?.userType}
-              </span>
             </div>
           </div>
         </div>
@@ -221,15 +216,15 @@ function SettingsPage() {
   );
 }
 
-export function Dashboard() {
+export function UserDashboard() {
   return (
-    <DashboardLayout>
+    <UserDashboardLayout>
       <Routes>
-        <Route path="/" element={<Overview />} />
-        <Route path="/websites" element={<Websites />} />
-        <Route path="/query" element={<Chat />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/" element={<UserOverview />} />
+        <Route path="/websites" element={<UserWebsites />} />
+        <Route path="/chat" element={<UserChat />} />
+        <Route path="/settings" element={<UserSettingsPage />} />
       </Routes>
-    </DashboardLayout>
+    </UserDashboardLayout>
   );
 }

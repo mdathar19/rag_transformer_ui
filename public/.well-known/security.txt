@@ -1,0 +1,18 @@
+Contact: mailto:no-reply@runit.in
+Preferred-Languages: en
+Canonical: https://lab.runit.in/.well-known/security.txt
+Policy: https://runit.in/security-policy
+Acknowledgments: https://runit.in/security-acknowledgments
+
+# Security Policy
+# If you discover a security vulnerability in RunIt Lab,
+# please report it responsibly by emailing no-reply@runit.in
+# with the subject line "Security Vulnerability Report"
+
+# Please include:
+# - Description of the vulnerability
+# - Steps to reproduce
+# - Potential impact
+# - Any suggested fixes
+
+# We appreciate your help in keeping RunIt Lab secure!

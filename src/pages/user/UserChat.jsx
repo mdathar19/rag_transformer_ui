@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { clientsAPI } from '../api/clients';
-import { MarkdownText } from '../components/MarkdownText';
-import { LoadingSpinner } from '../components/Loading';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/Select';
+import { useAuth } from '../../contexts/AuthContext';
+import { userWebsitesAPI, userChatAPI } from '../../api/userAPI';
+import { MarkdownText } from '../../components/MarkdownText';
+import { LoadingSpinner } from '../../components/Loading';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/Select';
 import { MessageSquare, Send, Globe, User, Bot, ExternalLink, Trash2 } from 'lucide-react';
 
-export function Chat() {
+export function UserChat() {
   const { user } = useAuth();
   const [websites, setWebsites] = useState([]);
   const [selectedWebsite, setSelectedWebsite] = useState('');
@@ -30,7 +30,7 @@ export function Chat() {
 
   const loadWebsites = async () => {
     try {
-      const response = await clientsAPI.list();
+      const response = await userWebsitesAPI.list();
       const sites = response.data.clients || [];
       setWebsites(sites);
 
@@ -71,19 +71,7 @@ export function Chat() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/v1/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          brokerId: selectedWebsite,
-          query: currentInput,
-          sessionId,
-        }),
-      });
+      const response = await userChatAPI.chat(selectedWebsite, currentInput, sessionId);
 
       if (!response.ok) throw new Error('Failed to get response');
 

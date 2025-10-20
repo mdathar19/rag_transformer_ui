@@ -2,19 +2,14 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../api/auth';
 import { useAuth } from '../contexts/AuthContext';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/primitives/Card';
-import { Button } from '../components/primitives/Button';
-import { Input } from '../components/primitives/Input';
-import { Label } from '../components/primitives/Label';
 import { ThemeToggle } from '../components/ThemeToggle';
-import { UserPlus, Mail, Lock, Building2, User } from 'lucide-react';
+import { SEO, SEOConfig } from '../components/SEO';
+import { Mail, Building2, User, AlertCircle, Zap, Bot, Database, TrendingUp, ArrowRight, CheckCircle2, Shield } from 'lucide-react';
 
 export function Signup() {
   const [step, setStep] = useState('register'); // 'register' or 'otp'
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    confirmPassword: '',
     companyName: '',
     firstName: '',
     lastName: '',
@@ -22,6 +17,7 @@ export function Signup() {
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [otpData, setOtpData] = useState(null);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -29,26 +25,24 @@ export function Signup() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleRegister = async (e) => {
+  const handleRequestSignupOTP = async (e) => {
     e.preventDefault();
     setError('');
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
-
     setLoading(true);
 
     try {
-      // First request OTP
-      await authAPI.requestOTP(formData.email);
+      // Request OTP for signup with all registration data
+      const response = await authAPI.requestSignupOTP({
+        email: formData.email,
+        companyName: formData.companyName,
+        profile: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+        },
+      });
+      setOtpData(response.data);
       setStep('otp');
+      console.log('OTP:', response.data.otp); // For development
     } catch (err) {
       setError(err.error || 'Failed to send OTP');
     } finally {
@@ -62,20 +56,8 @@ export function Signup() {
     setLoading(true);
 
     try {
-      // Verify OTP
-      await authAPI.verifyOTP(formData.email, otp);
-
-      // Register user
-      const response = await authAPI.register({
-        email: formData.email,
-        password: formData.password,
-        companyName: formData.companyName,
-        profile: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-        },
-      });
-
+      // Verify OTP and create account
+      const response = await authAPI.verifySignupOTP(formData.email, otp);
       login(response.data.user, response.data.token);
       navigate('/dashboard');
     } catch (err) {
@@ -86,220 +68,208 @@ export function Signup() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 'var(--spacing-lg)',
-      position: 'relative',
-    }}>
-      <div style={{ position: 'absolute', top: 'var(--spacing-lg)', right: 'var(--spacing-lg)' }}>
-        <ThemeToggle />
-      </div>
+    <>
+      <SEO {...SEOConfig.signup} />
+      <div className="min-h-screen flex bg-white dark:bg-gray-900">
+        {/* Left Side - Video Only */}
+        <div className="hidden lg:flex lg:w-1/2 bg-black relative overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src="/brain-signalling.mp4" type="video/mp4" />
+          </video>
+        </div>
 
-      <Card style={{ width: '100%', maxWidth: '480px' }}>
-        <CardHeader style={{ textAlign: 'center' }}>
-          <div style={{
-            width: '60px',
-            height: '60px',
-            margin: '0 auto var(--spacing-md)',
-            borderRadius: '50%',
-            background: 'var(--purple-gradient)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <UserPlus size={32} color="white" />
+      {/* Right Side - All Content & Signup Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 relative">
+        <div className="absolute top-6 right-6">
+          <ThemeToggle />
+        </div>
+
+        <div className="w-full max-w-md">
+          {/* Logo & Brand */}
+          <div className="flex items-center gap-3 mb-8">
+            <img src="/favicon_io/android-chrome-192x192.png" alt="RunIt Logo" className="w-12 h-12" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">RunIt LAB</h1>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">RAG Transformer Platform</p>
+            </div>
           </div>
-          <CardTitle>Create Account</CardTitle>
-          <CardDescription>
-            Join RAG Transformer Platform
-          </CardDescription>
-        </CardHeader>
 
-        <CardContent>
+          {/* Header */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Create Your Account</h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Get started with RunIt today - no credit card required
+            </p>
+          </div>
+
+          {/* Error Message */}
           {error && (
-            <div style={{
-              padding: 'var(--spacing-md)',
-              marginBottom: 'var(--spacing-lg)',
-              background: '#fee',
-              border: '1px solid #fcc',
-              borderRadius: 'var(--border-radius-md)',
-              color: '#c00',
-              fontSize: '0.875rem',
-            }}>
-              {error}
+            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2">
+              <AlertCircle size={18} className="text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
             </div>
           )}
 
+          {/* Registration Form */}
           {step === 'register' ? (
-            <form onSubmit={handleRegister}>
-              <div style={{ marginBottom: 'var(--spacing-md)' }}>
-                <Label htmlFor="companyName">
-                  <Building2 size={14} style={{ display: 'inline', marginRight: '4px' }} />
+            <form onSubmit={handleRequestSignupOTP} className="space-y-4">
+              <div>
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <Building2 size={16} />
                   Company Name
-                </Label>
-                <Input
-                  id="companyName"
-                  name="companyName"
+                </label>
+                <input
                   type="text"
+                  name="companyName"
                   placeholder="Acme Inc"
                   value={formData.companyName}
                   onChange={handleChange}
                   required
+                  className="w-full px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all"
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-md)' }}>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
-                    id="firstName"
-                    name="firstName"
+                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    <User size={16} />
+                    First Name
+                  </label>
+                  <input
                     type="text"
+                    name="firstName"
                     placeholder="John"
                     value={formData.firstName}
                     onChange={handleChange}
                     required
+                    className="w-full px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    name="lastName"
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
+                    Last Name
+                  </label>
+                  <input
                     type="text"
+                    name="lastName"
                     placeholder="Doe"
                     value={formData.lastName}
                     onChange={handleChange}
                     required
+                    className="w-full px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all"
                   />
                 </div>
               </div>
 
-              <div style={{ marginBottom: 'var(--spacing-md)' }}>
-                <Label htmlFor="email">
-                  <Mail size={14} style={{ display: 'inline', marginRight: '4px' }} />
-                  Email Address
-                </Label>
-                <Input
-                  id="email"
-                  name="email"
+              <div>
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <Mail size={16} />
+                  Work Email
+                </label>
+                <input
                   type="email"
-                  placeholder="your@email.com"
+                  name="email"
+                  placeholder="you@company.com"
                   value={formData.email}
                   onChange={handleChange}
                   required
+                  className="w-full px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all"
                 />
               </div>
 
-              <div style={{ marginBottom: 'var(--spacing-md)' }}>
-                <Label htmlFor="password">
-                  <Lock size={14} style={{ display: 'inline', marginRight: '4px' }} />
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <Button
+              <button
                 type="submit"
-                style={{ width: '100%' }}
                 disabled={loading}
+                className="w-full mt-2 px-6 py-3.5 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-primary-500/30"
               >
-                {loading ? 'Sending OTP...' : 'Continue'}
-              </Button>
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Sending OTP...
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    Continue
+                    <ArrowRight size={18} />
+                  </span>
+                )}
+              </button>
             </form>
           ) : (
-            <form onSubmit={handleVerifyAndRegister}>
-              <div style={{ marginBottom: 'var(--spacing-md)' }}>
-                <Label>Email</Label>
-                <div style={{
-                  padding: 'var(--spacing-md)',
-                  background: 'var(--bg-tertiary)',
-                  borderRadius: 'var(--border-radius-md)',
-                  fontSize: '0.875rem',
-                }}>
-                  {formData.email}
+            <form onSubmit={handleVerifyAndRegister} className="space-y-5">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                  Email Address
+                </label>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl">
+                  <p className="text-sm text-gray-900 dark:text-white font-medium">{formData.email}</p>
                 </div>
               </div>
 
-              <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                <Label htmlFor="otp">Enter OTP</Label>
-                <Input
-                  id="otp"
+              <div>
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  <Shield size={16} />
+                  Verification Code
+                </label>
+                <input
                   type="text"
                   placeholder="000000"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   maxLength={6}
                   required
-                  style={{ letterSpacing: '0.5em', fontSize: '1.25rem', textAlign: 'center' }}
+                  className="w-full px-4 py-4 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 transition-all text-center text-2xl font-bold tracking-[0.5em]"
                 />
-                <p style={{
-                  marginTop: 'var(--spacing-sm)',
-                  fontSize: '0.75rem',
-                  color: 'var(--text-muted)',
-                  textAlign: 'center',
-                }}>
-                  Check console for development OTP
-                </p>
+                {otpData && (
+                  <div className="flex items-center gap-2 mt-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                    <CheckCircle2 size={16} className="text-green-600 dark:text-green-400" />
+                    <p className="text-xs text-green-700 dark:text-green-400">
+                      OTP sent to your email! (Check console in dev mode)
+                    </p>
+                  </div>
+                )}
               </div>
 
-              <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
-                <Button
+              <div className="flex gap-3">
+                <button
                   type="button"
-                  variant="outline"
-                  style={{ flex: 1 }}
                   onClick={() => setStep('register')}
+                  className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold rounded-xl border-2 border-gray-200 dark:border-gray-700 transition-all"
                 >
                   Back
-                </Button>
-                <Button
+                </button>
+                <button
                   type="submit"
-                  style={{ flex: 1 }}
                   disabled={loading}
+                  className="flex-1 px-6 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-primary-500/30"
                 >
                   {loading ? 'Creating...' : 'Create Account'}
-                </Button>
+                </button>
               </div>
             </form>
           )}
-        </CardContent>
 
-        <CardFooter style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-            Already have an account?{' '}
-            <Link
-              to="/login"
-              style={{ color: 'var(--purple-600)', textDecoration: 'none', fontWeight: '500' }}
-            >
-              Sign in
-            </Link>
+          {/* Footer */}
+          <div className="mt-8 text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Already have an account?{' '}
+              <Link
+                to="/login"
+                className="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-semibold transition-colors"
+              >
+                Sign in
+              </Link>
+            </p>
           </div>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </div>
+    </>
   );
 }
