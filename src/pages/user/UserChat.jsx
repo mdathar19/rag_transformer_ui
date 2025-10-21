@@ -99,14 +99,9 @@ export function UserChat() {
                     ? { ...msg, content: fullContent, loading: false }
                     : msg
                 ));
-              } else if (data.type === 'sources') {
-                sources = data.sources || [];
-                setMessages(prev => prev.map(msg =>
-                  msg.id === botMessageId
-                    ? { ...msg, sources, loading: false }
-                    : msg
-                ));
               } else if (data.type === 'done') {
+                // Get sources from done event
+                sources = data.sources || [];
                 setMessages(prev => prev.map(msg =>
                   msg.id === botMessageId
                     ? { ...msg, content: fullContent, sources, loading: false }
