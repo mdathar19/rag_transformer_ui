@@ -87,6 +87,25 @@ export function CrawlLogViewer({ logsUrl, onClose }) {
     return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
   };
 
+  // Parse message to extract tags and format message
+  const parseMessage = (message) => {
+    const tags = [];
+    let formattedMessage = message;
+
+    // Check for [Embedding], [Cache], [Scraper] tags
+    if (message.toLowerCase().includes('embedding')) {
+      tags.push({ name: 'Embedding', color: 'bg-purple-600 text-white' });
+    }
+    if (message.toLowerCase().includes('cache') || message.toLowerCase().includes('cached')) {
+      tags.push({ name: 'Cache', color: 'bg-blue-600 text-white' });
+    }
+    if (message.toLowerCase().includes('scrap') || message.toLowerCase().includes('crawl')) {
+      tags.push({ name: 'Scraper', color: 'bg-green-600 text-white' });
+    }
+
+    return { tags, message: formattedMessage };
+  };
+
   return (
     <div className="mt-4 border border-gray-700 dark:border-gray-600 rounded-lg overflow-hidden bg-gray-900">
       {/* Header */}
@@ -130,16 +149,31 @@ export function CrawlLogViewer({ logsUrl, onClose }) {
             <div className="text-gray-500 text-center py-4">Waiting for logs...</div>
           ) : (
             <div className="space-y-1">
-              {logs.map((log, index) => (
-                <div key={index} className="flex gap-2">
-                  <span className="text-gray-600 flex-shrink-0">
-                    {formatTimestamp(log.timestamp)}
-                  </span>
-                  <span className={`${getLogColor(log.level)} break-all`}>
-                    {log.message}
-                  </span>
-                </div>
-              ))}
+              {logs.map((log, index) => {
+                const { tags, message } = parseMessage(log.message);
+                return (
+                  <div key={index} className="flex gap-2">
+                    <span className="text-gray-600 flex-shrink-0">
+                      {formatTimestamp(log.timestamp)}
+                    </span>
+                    {tags.length > 0 && (
+                      <div className="flex gap-1 flex-shrink-0">
+                        {tags.map((tag, i) => (
+                          <span
+                            key={i}
+                            className={`px-1.5 py-0.5 rounded text-xs font-semibold ${tag.color}`}
+                          >
+                            {tag.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <span className={`${getLogColor(log.level)} break-all`}>
+                      {message}
+                    </span>
+                  </div>
+                );
+              })}
               <div ref={logsEndRef} />
             </div>
           )}

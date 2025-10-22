@@ -3,21 +3,20 @@ import { useAuth } from '../../contexts/AuthContext';
 import { userWebsitesAPI, userChatAPI } from '../../api/userAPI';
 import { MarkdownText } from '../../components/MarkdownText';
 import { LoadingSpinner } from '../../components/Loading';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/Select';
 import { MessageSquare, Send, Globe, User, Bot, ExternalLink, Trash2 } from 'lucide-react';
 
 export function UserChat() {
   const { user } = useAuth();
-  const [websites, setWebsites] = useState([]);
-  const [selectedWebsite, setSelectedWebsite] = useState('');
+  const [website, setWebsite] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingWebsite, setLoadingWebsite] = useState(true);
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    loadWebsites();
+    loadWebsite();
   }, []);
 
   useEffect(() => {
@@ -28,24 +27,26 @@ export function UserChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const loadWebsites = async () => {
+  const loadWebsite = async () => {
     try {
+      setLoadingWebsite(true);
       const response = await userWebsitesAPI.list();
       const sites = response.data.clients || [];
-      setWebsites(sites);
 
-      const siteWithContent = sites.find(s => s.contentCount > 0);
-      if (siteWithContent) {
-        setSelectedWebsite(siteWithContent.brokerId);
+      // User can only have one website now
+      if (sites.length > 0) {
+        setWebsite(sites[0]);
       }
     } catch (err) {
-      console.error('Failed to load websites:', err);
+      console.error('Failed to load website:', err);
+    } finally {
+      setLoadingWebsite(false);
     }
   };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!input.trim() || !selectedWebsite || loading) return;
+    if (!input.trim() || !website || loading) return;
 
     const userMessage = {
       id: `user_${Date.now()}`,
@@ -71,7 +72,7 @@ export function UserChat() {
     setLoading(true);
 
     try {
-      const response = await userChatAPI.chat(selectedWebsite, currentInput, sessionId);
+      const response = await userChatAPI.chat(website.brokerId, currentInput, sessionId);
 
       if (!response.ok) throw new Error('Failed to get response');
 
@@ -139,64 +140,64 @@ export function UserChat() {
     }
   };
 
+  if (loadingWebsite) {
+    return (
+      <div className="max-w-7xl mx-auto h-[calc(100vh-120px)] flex items-center justify-center">
+        <div className="text-center">
+          <LoadingSpinner size="lg" />
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading your website...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto h-[calc(100vh-120px)]">
       <div className="flex flex-col gap-6 h-full">
         {/* Header */}
         <div className="flex justify-between items-center">
-          <div>
+          <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <MessageSquare className="w-8 h-8 text-primary-600" />
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Chat & Query</h1>
             </div>
-            <p className="text-gray-600 dark:text-gray-400">Ask questions about your website content</p>
-          </div>
-
-          <div className="flex gap-4 items-center">
-            <div>
-              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Select Website
-              </label>
-              <Select
-                value={selectedWebsite}
-                onValueChange={(value) => {
-                  setSelectedWebsite(value);
-                  setMessages([]);
-                }}
-              >
-                <SelectTrigger className="min-w-[240px]">
-                  <SelectValue placeholder="Choose a website..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {websites.map(site => (
-                    <SelectItem key={site.brokerId} value={site.brokerId}>
-                      {site.name} ({site.contentCount || 0} pages)
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex items-center gap-3">
+              <p className="text-gray-600 dark:text-gray-400">
+                Ask questions about your website content
+              </p>
+              {website && (
+                <div className="flex items-center gap-2 px-3 py-1 bg-primary-50 dark:bg-primary-900/20 rounded-full border border-primary-200 dark:border-primary-800">
+                  <Globe className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                  <span className="text-sm font-medium text-primary-700 dark:text-primary-300">
+                    {website.name}
+                  </span>
+                  <span className="text-xs text-primary-600 dark:text-primary-400">
+                    ({website.contentCount || 0} pages)
+                  </span>
+                </div>
+              )}
             </div>
-
-            {messages.length > 0 && (
-              <button
-                onClick={handleClearChat}
-                className="mt-5 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2 font-medium"
-              >
-                <Trash2 className="w-4 h-4" />
-                Clear Chat
-              </button>
-            )}
           </div>
+
+          {messages.length > 0 && (
+            <button
+              onClick={handleClearChat}
+              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2 font-medium"
+            >
+              <Trash2 className="w-4 h-4" />
+              Clear Chat
+            </button>
+          )}
         </div>
 
         {/* Chat Container */}
         <div className="flex-1 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col">
-          {!selectedWebsite ? (
+          {!website ? (
             <div className="flex-1 flex flex-col items-center justify-center p-12">
               <Globe className="w-16 h-16 text-gray-400 mb-4" />
-              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">Select a website to start</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">No website found</h2>
               <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
-                Choose a website from the dropdown above to ask questions about its content
+                Please add a website first to start chatting about its content
               </p>
             </div>
           ) : (

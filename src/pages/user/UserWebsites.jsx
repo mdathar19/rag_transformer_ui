@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { userWebsitesAPI, userCrawlAPI, getUserCrawlLogsUrl } from '../../api/userAPI';
 import { Loading, LoadingSpinner } from '../../components/Loading';
 import { CrawlLogViewer } from '../../components/CrawlLogViewer';
+import * as Dialog from '@radix-ui/react-dialog';
 import {
   Globe,
   Plus,
@@ -15,11 +17,13 @@ import {
   ExternalLink,
   Edit,
   X,
-  Save
+  Save,
+  ChevronRight
 } from 'lucide-react';
 
 export function UserWebsites() {
   const { token } = useAuth();
+  const navigate = useNavigate();
   const [websites, setWebsites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -27,6 +31,11 @@ export function UserWebsites() {
   const [editingWebsite, setEditingWebsite] = useState(null);
   const [crawlJobs, setCrawlJobs] = useState({});
   const [showLogs, setShowLogs] = useState({});
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteConfirmStep, setDeleteConfirmStep] = useState(1);
+  const [websiteToDelete, setWebsiteToDelete] = useState(null);
+  const [crawlDialogOpen, setCrawlDialogOpen] = useState(false);
+  const [websiteToCrawl, setWebsiteToCrawl] = useState(null);
 
   const { register, handleSubmit, reset, control, formState: { errors, isSubmitting } } = useForm({
     defaultValues: {
@@ -127,7 +136,16 @@ export function UserWebsites() {
     reset();
   };
 
-  const handleCrawl = async (brokerId) => {
+  const handleCrawlClick = (brokerId) => {
+    const website = websites.find(w => w.brokerId === brokerId);
+    setWebsiteToCrawl(website);
+    setCrawlDialogOpen(true);
+  };
+
+  const handleCrawlConfirm = async () => {
+    setCrawlDialogOpen(false);
+    const brokerId = websiteToCrawl.brokerId;
+
     try {
       const response = await userCrawlAPI.start(brokerId, {});
 
@@ -170,35 +188,64 @@ export function UserWebsites() {
     }
   };
 
-  const handleDelete = async (brokerId) => {
-    if (!confirm('Are you sure you want to delete this website?')) return;
+  const handleDeleteClick = (brokerId) => {
+    const website = websites.find(w => w.brokerId === brokerId);
+    setWebsiteToDelete(website);
+    setDeleteConfirmStep(1);
+    setDeleteDialogOpen(true);
+  };
 
+  const handleDeleteConfirm = async () => {
+    if (deleteConfirmStep === 1) {
+      // Move to second confirmation
+      setDeleteConfirmStep(2);
+      return;
+    }
+
+    // Final deletion
     try {
-      await userWebsitesAPI.delete(brokerId);
+      await userWebsitesAPI.delete(websiteToDelete.brokerId);
       await fetchWebsites();
+      setError(''); // Clear any errors
+      setDeleteDialogOpen(false);
+      setWebsiteToDelete(null);
+      setDeleteConfirmStep(1);
     } catch (err) {
       setError(err.error || 'Failed to delete website');
+      setDeleteDialogOpen(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setWebsiteToDelete(null);
+    setDeleteConfirmStep(1);
   };
 
   if (loading) {
     return <Loading size="lg" message="Loading your websites..." />;
   }
 
+  // Get the single website (users can only have one)
+  const website = websites.length > 0 ? websites[0] : null;
+  const hasWebsite = website !== null;
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Globe size={32} className="text-gray-900 dark:text-white" />
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white font-saira">My Websites</h2>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white font-saira">My Website</h2>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
-        >
-          <Plus size={18} />
-          Add Website
-        </button>
+        {!hasWebsite && (
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
+          >
+            <Plus size={18} />
+            Add Website
+          </button>
+        )}
       </div>
 
       {error && (
@@ -248,6 +295,23 @@ export function UserWebsites() {
                   className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 {errors.domain && <p className="mt-1 text-sm text-red-600">{errors.domain.message}</p>}
+                {!editingWebsite && (
+                  <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                    <div className="flex gap-2">
+                      <AlertCircle size={18} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm text-amber-700 dark:text-amber-300">
+                        <p className="font-semibold mb-1">Important: robots.txt Required</p>
+                        <p className="text-xs">
+                          Your website must have a <code className="bg-amber-100 dark:bg-amber-900/40 px-1 py-0.5 rounded">robots.txt</code> file
+                          for successful crawling. The crawler respects robots.txt directives.
+                          <a href="https://www.robotstxt.org/" target="_blank" rel="noopener noreferrer" className="underline ml-1">
+                            Learn more
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -444,129 +508,377 @@ export function UserWebsites() {
         </div>
       )}
 
-      {websites.length === 0 ? (
+      {!hasWebsite ? (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
           <Globe size={64} className="mx-auto text-gray-400 dark:text-gray-600 mb-4" />
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No websites yet</h3>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No website yet</h3>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Add your first website to get started with AI-powered content indexing
+            Add your website to get started with AI-powered content indexing
           </p>
           <button
             onClick={() => setShowForm(true)}
             className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
           >
             <Plus size={18} />
-            Add Your First Website
+            Add Your Website
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5">
-          {websites.map((website) => (
-            <div
-              key={website.brokerId}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                      {website.name}
-                    </h3>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        website.status === 'active'
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                          : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
-                      }`}
-                    >
-                      {website.status}
+        <div className="space-y-6">
+          {/* Website Header */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {website.name}
+                  </h3>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      website.status === 'active'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400'
+                    }`}
+                  >
+                    {website.status}
+                  </span>
+                </div>
+                <a
+                  href={website.domain}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-primary-600 dark:text-primary-400 hover:underline mb-2"
+                >
+                  {website.domain}
+                  <ExternalLink size={16} />
+                </a>
+                {website.metadata?.description && (
+                  <p className="text-gray-600 dark:text-gray-400 mt-2">
+                    {website.metadata.description}
+                  </p>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleEdit(website)}
+                  className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                  title="Edit website"
+                >
+                  <Edit size={20} />
+                </button>
+                <button
+                  onClick={() => handleCrawlClick(website.brokerId)}
+                  disabled={!!crawlJobs[website.brokerId]}
+                  className="px-4 py-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  title="Crawl website"
+                >
+                  {crawlJobs[website.brokerId] ? (
+                    <>
+                      <LoadingSpinner size="sm" />
+                      <span className="text-sm font-medium">Crawling...</span>
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw size={20} />
+                      <span className="text-sm font-medium">CRAWL</span>
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => handleDeleteClick(website.brokerId)}
+                  className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  title="Delete website"
+                >
+                  <Trash2 size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="text-center p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Pages Indexed</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {website.contentCount || 0}
+                </p>
+              </div>
+              <div className="text-center p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Embeddings</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {website.usage?.embeddingsGenerated || 0}
+                </p>
+              </div>
+              <div className="text-center p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Last Crawled</p>
+                <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {website.lastCrawl
+                    ? new Date(website.lastCrawl).toLocaleDateString()
+                    : 'Never'}
+                </p>
+              </div>
+              <div className="text-center p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Industry</p>
+                <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {website.metadata?.industry || 'N/A'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Subdomains Section */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Globe size={24} className="text-primary-600" />
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Domains & Subdomains
+                  <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+                    ({website.domains?.length || 0} {website.domains?.length === 1 ? 'domain' : 'domains'})
+                  </span>
+                </h3>
+              </div>
+              <button
+                onClick={() => navigate(`/user/dashboard/websites/${website.brokerId}`)}
+                className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
+              >
+                <Plus size={18} />
+                Manage Subdomains
+              </button>
+            </div>
+
+            {website.domains && website.domains.length > 0 ? (
+              <div className="space-y-3">
+                {website.domains.map((domain, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Globe size={18} className="text-gray-400" />
+                      <div>
+                        <a
+                          href={domain.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary-600 dark:text-primary-400 hover:underline font-medium"
+                        >
+                          {domain.url}
+                        </a>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          Type: {domain.type} • Max Pages: {domain.crawlSettings?.maxPages || 100}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 text-xs font-medium rounded-full">
+                      {domain.type}
                     </span>
                   </div>
-                  <a
-                    href={website.domain}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-sm text-primary-600 dark:text-primary-400 hover:underline"
-                  >
-                    {website.domain}
-                    <ExternalLink size={14} />
-                  </a>
-                  {website.metadata?.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                      {website.metadata.description}
-                    </p>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleEdit(website)}
-                    className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                    title="Edit website"
-                  >
-                    <Edit size={18} />
-                  </button>
-                  <button
-                    onClick={() => handleCrawl(website.brokerId)}
-                    disabled={!!crawlJobs[website.brokerId]}
-                    className="px-3 py-2 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                    title="Crawl website"
-                  >
-                    {crawlJobs[website.brokerId] ? (
-                      <>
-                        <LoadingSpinner size="sm" />
-                        <span className="text-sm font-medium">Crawling...</span>
-                      </>
-                    ) : (
-                      <>
-                        <RefreshCw size={18} />
-                        <span className="text-sm font-medium">CRAWL</span>
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => handleDelete(website.brokerId)}
-                    className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                    title="Delete website"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
+                ))}
               </div>
-
-              <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Pages Indexed</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white">
-                    {website.contentCount || 0}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Last Crawled</p>
-                  <p className="text-sm text-gray-900 dark:text-white">
-                    {website.lastCrawl
-                      ? new Date(website.lastCrawl).toLocaleDateString()
-                      : 'Never'}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Industry</p>
-                  <p className="text-sm text-gray-900 dark:text-white">
-                    {website.metadata?.industry || 'N/A'}
-                  </p>
-                </div>
+            ) : (
+              <div className="text-center py-8 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                <Globe size={48} className="mx-auto text-gray-400 mb-2" />
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  No subdomains added yet
+                </p>
+                <button
+                  onClick={() => navigate(`/user/dashboard/websites/${website.brokerId}`)}
+                  className="text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium"
+                >
+                  Add your first subdomain →
+                </button>
               </div>
+            )}
+          </div>
 
-              {/* Crawl Log Viewer */}
-              {showLogs[website.brokerId] && crawlJobs[website.brokerId] && (
-                <CrawlLogViewer
-                  logsUrl={getUserCrawlLogsUrl(crawlJobs[website.brokerId], token)}
-                  onClose={() => setShowLogs({ ...showLogs, [website.brokerId]: false })}
-                />
-              )}
-            </div>
-          ))}
+          {/* Crawl Log Viewer */}
+          {showLogs[website.brokerId] && crawlJobs[website.brokerId] && (
+            <CrawlLogViewer
+              logsUrl={getUserCrawlLogsUrl(crawlJobs[website.brokerId], token)}
+              onClose={() => setShowLogs({ ...showLogs, [website.brokerId]: false })}
+            />
+          )}
         </div>
       )}
+
+      {/* Crawl Confirmation Dialog */}
+      <Dialog.Root open={crawlDialogOpen} onOpenChange={setCrawlDialogOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
+          <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 w-full max-w-md z-50">
+            <Dialog.Title className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <RefreshCw className="text-primary-600 dark:text-primary-400" size={24} />
+              Start Crawl?
+            </Dialog.Title>
+
+            <Dialog.Description className="text-gray-700 dark:text-gray-300 mb-6 space-y-4">
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                <p className="font-semibold text-amber-900 dark:text-amber-200 mb-2">
+                  ⚠️ Important: Data will be refreshed
+                </p>
+              </div>
+
+              <div>
+                <p className="mb-2 text-gray-900 dark:text-white">
+                  Starting a new crawl will <strong>DELETE all existing indexed pages</strong> for this website and re-index from scratch.
+                </p>
+                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 space-y-1 text-sm">
+                  <p><strong>Website:</strong> {websiteToCrawl?.name}</p>
+                  <p><strong>Current Pages:</strong> {websiteToCrawl?.contentCount || 0}</p>
+                  <p><strong>Domains to crawl:</strong> {websiteToCrawl?.domains?.length || 0}</p>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                This is useful when you've changed domains/subdomains or need fresh data.
+              </p>
+            </Dialog.Description>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setCrawlDialogOpen(false)}
+                className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCrawlConfirm}
+                className="flex-1 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <RefreshCw size={18} />
+                Start Crawl
+              </button>
+            </div>
+
+            <Dialog.Close asChild>
+              <button
+                onClick={() => setCrawlDialogOpen(false)}
+                className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                aria-label="Close"
+              >
+                <X size={20} />
+              </button>
+            </Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog.Root open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
+          <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 w-full max-w-md z-50">
+            <Dialog.Title className="text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <AlertCircle className="text-red-600 dark:text-red-400" size={24} />
+              {deleteConfirmStep === 1 ? 'Delete Website?' : 'Final Confirmation'}
+            </Dialog.Title>
+
+            {deleteConfirmStep === 1 ? (
+              <>
+                <Dialog.Description className="text-gray-700 dark:text-gray-300 mb-6 space-y-4">
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                    <p className="font-semibold text-red-900 dark:text-red-200 mb-2">
+                      ⚠️ WARNING: This action CANNOT be undone!
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="font-semibold mb-2 text-gray-900 dark:text-white">You are about to permanently delete:</p>
+                    <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3 space-y-1 text-sm">
+                      <p><strong>Website:</strong> {websiteToDelete?.name}</p>
+                      <p><strong>Domain:</strong> {websiteToDelete?.domain}</p>
+                      <p><strong>Subdomains:</strong> {websiteToDelete?.domains?.length || 0}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="font-semibold mb-2 text-gray-900 dark:text-white">This will also DELETE:</p>
+                    <ul className="space-y-1 text-sm">
+                      <li className="flex items-center gap-2">
+                        <span className="text-red-600 dark:text-red-400">•</span>
+                        All <strong>{websiteToDelete?.contentCount || 0}</strong> indexed pages
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-red-600 dark:text-red-400">•</span>
+                        All <strong>{websiteToDelete?.usage?.embeddingsGenerated || 0}</strong> embeddings
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-red-600 dark:text-red-400">•</span>
+                        All crawl history and logs
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-red-600 dark:text-red-400">•</span>
+                        All query history
+                      </li>
+                    </ul>
+                  </div>
+                </Dialog.Description>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleDeleteCancel}
+                    className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteConfirm}
+                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    Continue
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <Dialog.Description className="text-gray-700 dark:text-gray-300 mb-6 space-y-4">
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                    <p className="font-semibold text-red-900 dark:text-red-200 mb-2 text-center text-lg">
+                      ⚠️ FINAL CONFIRMATION
+                    </p>
+                  </div>
+
+                  <p className="text-center text-gray-900 dark:text-white">
+                    You are about to permanently delete
+                  </p>
+                  <p className="text-center text-xl font-bold text-red-600 dark:text-red-400">
+                    "{websiteToDelete?.name}"
+                  </p>
+                  <p className="text-center text-gray-700 dark:text-gray-300 text-sm">
+                    This is your last chance to cancel!
+                  </p>
+                </Dialog.Description>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleDeleteCancel}
+                    className="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteConfirm}
+                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Trash2 size={18} />
+                    Delete Forever
+                  </button>
+                </div>
+              </>
+            )}
+
+            <Dialog.Close asChild>
+              <button
+                onClick={handleDeleteCancel}
+                className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                aria-label="Close"
+              >
+                <X size={20} />
+              </button>
+            </Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }

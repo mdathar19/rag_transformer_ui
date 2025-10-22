@@ -35,4 +35,17 @@
   ::-webkit-scrollbar-thumb {
     @apply bg-primary-500 rounded-md hover:bg-primary-600;
   }
+
+  /* Wave gradient animation for website names */
+  @keyframes wave-gradient {
+    0% {
+      background-position: 0% center;
+    }
+    50% {
+      background-position: 100% center;
+    }
+    100% {
+      background-position: 0% center;
+    }
+  }
 }
