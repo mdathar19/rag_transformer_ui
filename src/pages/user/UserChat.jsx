@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { userWebsitesAPI, userChatAPI } from '../../api/userAPI';
 import { MarkdownText } from '../../components/MarkdownText';
-import { LoadingSpinner } from '../../components/Loading';
+import { Loading, LoadingSpinner } from '../../components/Loading';
 import { MessageSquare, Send, Globe, User, Bot, ExternalLink, Trash2 } from 'lucide-react';
 
 export function UserChat() {
@@ -142,12 +142,7 @@ export function UserChat() {
 
   if (loadingWebsite) {
     return (
-      <div className="max-w-7xl mx-auto h-[calc(100vh-120px)] flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner size="lg" />
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading your website...</p>
-        </div>
-      </div>
+      <Loading size="lg" message="Loading your chats..." />
     );
   }
 
@@ -230,7 +225,7 @@ export function UserChat() {
                     </div>
 
                     {/* Message Content */}
-                    <div className="flex-1 max-w-[80%]">
+                    <div className="max-w-[80%]">
                       <div className={`rounded-2xl px-5 py-3 ${
                         message.type === 'user'
                           ? 'bg-gradient-to-br from-primary-500 to-primary-700 text-white ml-auto'
@@ -244,7 +239,7 @@ export function UserChat() {
                           <div className="prose prose-sm dark:prose-invert max-w-none">
                             {message.loading ? (
                               <div className="flex items-center gap-3">
-                                <LoadingSpinner size="md" />
+                                 <LoadingSpinner size="md" />
                                 <span className="text-sm text-gray-600 dark:text-gray-400 animate-pulse">Thinking...</span>
                               </div>
                             ) : (

@@ -81,3 +81,17 @@ export const userChatAPI = {
   // Clear chat session
   clearSession: (sessionId) => apiClient.delete(`/user/chat/session/${sessionId}`),
 };
+
+export const userWidgetAPI = {
+  // Get widget settings for user's website
+  getSettings: (brokerId) => apiClient.get(`/user/widget/${brokerId}`),
+
+  // Update widget settings
+  updateSettings: (brokerId, settings) => apiClient.put(`/user/widget/${brokerId}`, settings),
+  // Get widget API key
+  getApiKey: (brokerId) => apiClient.get(`/user/widget/${brokerId}/api-key`),
+
+
+  // Get widget script URL
+  getScriptUrl: (brokerId) => `${API_BASE_URL.replace('/api/v1', '')}/chat-widget.js?brokerId=${brokerId}`,
+};

@@ -525,6 +525,20 @@ export function UserWebsites() {
         </div>
       ) : (
         <div className="space-y-6">
+          {/* Crawl Warning Info */}
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" size={20} />
+              <div>
+                <p className="font-semibold text-blue-900 dark:text-blue-200 mb-1">When to Crawl Your Website</p>
+                <p className="text-sm text-blue-800 dark:text-blue-300">
+                  Only crawl when your website content has changed (new pages, updated content, or modified subdomains).
+                  Crawling an unchanged website will not update any data and wastes resources.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Website Header */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div className="flex items-start justify-between mb-4">
@@ -715,6 +729,14 @@ export function UserWebsites() {
               <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
                 <p className="font-semibold text-amber-900 dark:text-amber-200 mb-2">
                   ⚠️ Important: Data will be refreshed
+                </p>
+              </div>
+
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <p className="text-sm text-blue-900 dark:text-blue-200">
+                  <strong>💡 When to Crawl:</strong> Only crawl when your website content has changed.
+                  Crawling with no changes on your website will not update any data and wastes resources.
+                  Crawl after adding new pages, updating content, or modifying subdomains.
                 </p>
               </div>
 

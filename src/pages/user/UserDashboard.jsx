@@ -6,6 +6,7 @@ import { userWebsitesAPI } from '../../api/userAPI';
 import { UserWebsites } from './UserWebsites';
 import { WebsiteDetails } from './WebsiteDetails';
 import { UserChat } from './UserChat';
+import { WidgetSettings } from './WidgetSettings';
 import {
   LayoutDashboard,
   Globe,
@@ -15,7 +16,8 @@ import {
   User,
   Sparkles,
   Mail,
-  Phone
+  Phone,
+  Code
 } from 'lucide-react';
 
 function UserDashboardLayout({ children }) {
@@ -32,6 +34,7 @@ function UserDashboardLayout({ children }) {
     { icon: LayoutDashboard, label: 'Overview', path: '/user/dashboard' },
     { icon: Globe, label: 'My Websites', path: '/user/dashboard/websites' },
     { icon: MessageSquare, label: 'Chat', path: '/user/dashboard/chat' },
+    { icon: Code, label: 'Widget Settings', path: '/user/dashboard/widget' },
     { icon: Settings, label: 'Settings', path: '/user/dashboard/settings' },
   ];
 
@@ -409,6 +412,7 @@ export function UserDashboard() {
         <Route path="/websites" element={<UserWebsites />} />
         <Route path="/websites/:brokerId" element={<WebsiteDetails />} />
         <Route path="/chat" element={<UserChat />} />
+        <Route path="/widget" element={<WidgetSettings />} />
         <Route path="/settings" element={<UserSettingsPage />} />
       </Routes>
     </UserDashboardLayout>
