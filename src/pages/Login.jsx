@@ -162,7 +162,7 @@ export function Login() {
                   <div className="flex items-center gap-2 mt-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                     <CheckCircle2 size={16} className="text-green-600 dark:text-green-400" />
                     <p className="text-xs text-green-700 dark:text-green-400">
-                      OTP sent to your email! (Check console in dev mode)
+                      OTP sent to your email!
                     </p>
                   </div>
                 )}

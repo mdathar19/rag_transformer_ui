@@ -89,26 +89,19 @@ function UserDashboardLayout({ children }) {
             </p>
             <div className="space-y-2">
               <a
-                href="mailto:no-reply@runit.in"
+                href="mailto:support@ragsense.co"
                 className="flex items-center gap-2 text-xs text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100 transition-colors group"
               >
                 <Mail size={14} className="flex-shrink-0" />
-                <span className="truncate group-hover:underline">no-reply@runit.in</span>
+                <span className="truncate group-hover:underline">support@ragsense.co</span>
               </a>
-              <a
-                href="mailto:mdathar19@gmail.com"
-                className="flex items-center gap-2 text-xs text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100 transition-colors group"
-              >
-                <Mail size={14} className="flex-shrink-0" />
-                <span className="truncate group-hover:underline">mdathar19@gmail.com</span>
-              </a>
-              <a
+              {/* <a
                 href="tel:+918617852693"
                 className="flex items-center gap-2 text-xs text-blue-700 dark:text-blue-300 hover:text-blue-900 dark:hover:text-blue-100 transition-colors group"
               >
                 <Phone size={14} className="flex-shrink-0" />
                 <span className="group-hover:underline">+91-8617852693</span>
-              </a>
+              </a> */}
             </div>
           </div>
 
