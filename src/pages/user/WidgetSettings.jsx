@@ -236,7 +236,7 @@ export function WidgetSettings() {
   }, []);
 
   const baseUrl = useMemo(() => {
-    return import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'https://brain.runit.in';
+    return import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'https://brain.ragsense.co/';
   }, []);
 
   if (loading) {
