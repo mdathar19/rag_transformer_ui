@@ -93,9 +93,9 @@ export function Signup() {
         <div className="w-full max-w-md">
           {/* Logo & Brand */}
           <div className="flex items-center gap-3 mb-8">
-            <img src="/favicon_io/android-chrome-192x192.png" alt="RunIt Logo" className="w-12 h-12" />
+            <img src="/favicon_io/android-chrome-192x192.png" alt="RagSense Logo" className="w-12 h-12" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">RunIt LAB</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">RagSense LAB</h1>
               <p className="text-gray-600 dark:text-gray-400 text-sm">RAG Transformer Platform</p>
             </div>
           </div>
@@ -104,7 +104,7 @@ export function Signup() {
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Create Your Account</h2>
             <p className="text-gray-600 dark:text-gray-400">
-              Get started with RunIt today - no credit card required
+              Get started with RagSense today - no credit card required
             </p>
           </div>
 

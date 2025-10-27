@@ -46,10 +46,10 @@ function UserDashboardLayout({ children }) {
           {/* Logo */}
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center">
-              <img src="/favicon_io/android-chrome-192x192.png" alt="RunIt Logo" className="w-10 h-10" />
+              <img src="/favicon_io/android-chrome-192x192.png" alt="RagSense Logo" className="w-10 h-10" />
             </div>
             <div>
-              <p className="text-base font-bold text-gray-900 dark:text-white font-saira">RunIt LAB</p>
+              <p className="text-base font-bold text-gray-900 dark:text-white font-saira">RagSense LAB</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">User Portal</p>
             </div>
           </div>

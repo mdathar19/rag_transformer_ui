@@ -43,7 +43,7 @@ function AdminDashboardLayout({ children }) {
               <Sparkles size={24} color="white" />
             </div>
             <div>
-              <p className="text-base font-bold text-gray-900 dark:text-white font-saira">RunIt LAB</p>
+              <p className="text-base font-bold text-gray-900 dark:text-white font-saira">RagSense LAB</p>
               <p className="text-xs text-gray-500 dark:text-gray-400">Admin Portal</p>
             </div>
           </div>

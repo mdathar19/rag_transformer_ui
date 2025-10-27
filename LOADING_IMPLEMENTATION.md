@@ -1,7 +1,7 @@
 # Loading Implementation Documentation
 
 ## Overview
-This document describes the comprehensive loading system implemented across the RunIt Lab application using a custom loading image with circular popping animations.
+This document describes the comprehensive loading system implemented across the RagSense Lab application using a custom loading image with circular popping animations.
 
 ## Loading Component (`/src/components/Loading.jsx`)
 

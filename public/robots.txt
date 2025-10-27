@@ -1,5 +1,5 @@
-# RunIt Lab - AI-Powered RAG Platform
-# https://lab.runit.in
+# RagSense Lab - AI-Powered RAG Platform
+# https://lab.ragsense.co
 # This is an authenticated application subdomain
 
 User-agent: *
@@ -15,7 +15,7 @@ Disallow: /dashboard
 Disallow: /api
 
 # Sitemap location
-Sitemap: https://lab.runit.in/sitemap.xml
+Sitemap: https://lab.ragsense.co/sitemap.xml
 
 # Block all AI scrapers and crawlers from training on our content
 User-agent: GPTBot

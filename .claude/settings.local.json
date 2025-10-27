@@ -7,7 +7,7 @@
       "Bash(npm install -D @tailwindcss/typography)",
       "Bash(cat package.json)",
       "Read(//c/**)",
-      "Bash(cat \"C:\\test\\RunIt\\server\\.env\")",
+      "Bash(cat \"C:\\test\\RagSense\\server\\.env\")",
       "Bash(npm install react-hook-form)",
       "Bash(cat:*)",
       "Bash(node apply-fixes.js:*)",

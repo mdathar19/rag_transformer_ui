@@ -1,11 +1,11 @@
 Contact: mailto:no-reply@runit.in
 Preferred-Languages: en
-Canonical: https://lab.runit.in/.well-known/security.txt
+Canonical: https://lab.ragsense.co/.well-known/security.txt
 Policy: https://runit.in/security-policy
 Acknowledgments: https://runit.in/security-acknowledgments
 
 # Security Policy
-# If you discover a security vulnerability in RunIt Lab,
+# If you discover a security vulnerability in RagSense Lab,
 # please report it responsibly by emailing no-reply@runit.in
 # with the subject line "Security Vulnerability Report"
 
@@ -15,4 +15,4 @@ Acknowledgments: https://runit.in/security-acknowledgments
 # - Potential impact
 # - Any suggested fixes
 
-# We appreciate your help in keeping RunIt Lab secure!
+# We appreciate your help in keeping RagSense Lab secure!

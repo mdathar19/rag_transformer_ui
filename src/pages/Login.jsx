@@ -75,9 +75,9 @@ export function Login() {
         <div className="w-full max-w-lg py-8">
           {/* Logo & Brand */}
           <div className="flex items-center gap-3 mb-8">
-            <img src="/favicon_io/android-chrome-192x192.png" alt="RunIt Logo" className="w-12 h-12" />
+            <img src="/favicon_io/android-chrome-192x192.png" alt="RagSense Logo" className="w-12 h-12" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">RunIt LAB</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">RagSense LAB</h1>
               <p className="text-gray-600 dark:text-gray-400 text-sm">RAG Transformer Platform</p>
             </div>
           </div>

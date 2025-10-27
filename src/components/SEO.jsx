@@ -11,9 +11,9 @@ import { useEffect } from 'react';
  * @param {string} props.ogType - Open Graph type (default: website)
  */
 export function SEO({
-  title = 'RunIt - AI-Powered RAG Chatbot Platform',
-  description = 'Deploy intelligent AI chatbots in minutes with RunIt. Automatically index your website content and provide instant, accurate answers to customers 24/7.',
-  keywords = 'AI chatbot, RAG platform, customer support automation, website chatbot, intelligent chatbot, AI customer service, automated support, conversational AI, RunIt, chatbot platform',
+  title = 'RagSense - AI-Powered RAG Chatbot Platform',
+  description = 'Deploy intelligent AI chatbots in minutes with RagSense. Automatically index your website content and provide instant, accurate answers to customers 24/7.',
+  keywords = 'AI chatbot, RAG platform, customer support automation, website chatbot, intelligent chatbot, AI customer service, automated support, conversational AI, RagSense, chatbot platform',
   canonical = 'https://runit.in',
   ogImage = 'https://runit.in/favicon_io/android-chrome-512x512.png',
   ogType = 'website',
@@ -72,45 +72,45 @@ export function SEO({
 // Note: Dashboard pages are behind authentication and use noindex
 export const SEOConfig = {
   login: {
-    title: 'Sign In - RunIt Lab | Access Your AI Chatbot Dashboard',
-    description: 'Sign in to RunIt Lab to manage your AI-powered RAG chatbots. Access your dashboard, manage website content, and configure intelligent customer support.',
-    keywords: 'RunIt Lab login, AI chatbot dashboard, RAG platform signin, customer support login',
-    canonical: 'https://lab.runit.in/login',
+    title: 'Sign In - RagSense Lab | Access Your AI Chatbot Dashboard',
+    description: 'Sign in to RagSense Lab to manage your AI-powered RAG chatbots. Access your dashboard, manage website content, and configure intelligent customer support.',
+    keywords: 'RagSense Lab login, AI chatbot dashboard, RAG platform signin, customer support login',
+    canonical: 'https://lab.ragsense.co/login',
   },
 
   signup: {
-    title: 'Create Account - RunIt Lab | Start Building AI Chatbots',
-    description: 'Create your RunIt Lab account and start building intelligent AI chatbots. Deploy RAG-powered customer support, index website content, and automate responses.',
-    keywords: 'RunIt Lab signup, create AI chatbot account, RAG platform registration, start free',
-    canonical: 'https://lab.runit.in/signup',
+    title: 'Create Account - RagSense Lab | Start Building AI Chatbots',
+    description: 'Create your RagSense Lab account and start building intelligent AI chatbots. Deploy RAG-powered customer support, index website content, and automate responses.',
+    keywords: 'RagSense Lab signup, create AI chatbot account, RAG platform registration, start free',
+    canonical: 'https://lab.ragsense.co/signup',
   },
 
   // Dashboard pages - These should not be indexed (authenticated pages)
   dashboard: {
-    title: 'Dashboard - RunIt Lab',
+    title: 'Dashboard - RagSense Lab',
     description: 'Manage your AI chatbots, view analytics, and configure settings.',
     keywords: 'chatbot dashboard, AI analytics',
-    canonical: 'https://lab.runit.in/dashboard',
+    canonical: 'https://lab.ragsense.co/dashboard',
   },
 
   websites: {
-    title: 'Websites - RunIt Lab',
+    title: 'Websites - RagSense Lab',
     description: 'Add and manage website URLs for AI chatbot indexing.',
     keywords: 'website indexing, content management',
-    canonical: 'https://lab.runit.in/dashboard/websites',
+    canonical: 'https://lab.ragsense.co/dashboard/websites',
   },
 
   chat: {
-    title: 'Query & Chat - RunIt Lab',
+    title: 'Query & Chat - RagSense Lab',
     description: 'Test and interact with your AI chatbot.',
     keywords: 'AI chat test, chatbot testing',
-    canonical: 'https://lab.runit.in/dashboard/query',
+    canonical: 'https://lab.ragsense.co/dashboard/query',
   },
 
   settings: {
-    title: 'Settings - RunIt Lab',
+    title: 'Settings - RagSense Lab',
     description: 'Manage your account settings and configurations.',
     keywords: 'account settings, chatbot settings',
-    canonical: 'https://lab.runit.in/dashboard/settings',
+    canonical: 'https://lab.ragsense.co/dashboard/settings',
   },
 };

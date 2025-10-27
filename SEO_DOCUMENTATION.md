@@ -1,10 +1,10 @@
-# SEO Documentation - RunIt Lab
+# SEO Documentation - RagSense Lab
 
 ## Overview
-This document outlines the SEO implementation for RunIt Lab (lab.runit.in), the authenticated RAG platform application.
+This document outlines the SEO implementation for RagSense Lab (lab.ragsense.co), the authenticated RAG platform application.
 
 ## Important Notes
-- **Domain**: This application runs on `lab.runit.in` (subdomain)
+- **Domain**: This application runs on `lab.ragsense.co` (subdomain)
 - **Main Website**: The marketing website is at `runit.in` (Next.js)
 - **Public Pages**: Only `/login` and `/signup` are publicly accessible
 - **Authenticated Pages**: Dashboard and all other pages require authentication
@@ -23,25 +23,25 @@ Since this is an authenticated application, most pages should NOT be indexed by 
 
 #### Primary Meta Tags
 ```html
-<title>RunIt Lab - AI-Powered RAG Platform | Sign In or Create Account</title>
-<meta name="description" content="Access RunIt Lab to manage your AI-powered RAG chatbots..." />
-<meta name="keywords" content="RunIt Lab, AI chatbot login, RAG platform..." />
+<title>RagSense Lab - AI-Powered RAG Platform | Sign In or Create Account</title>
+<meta name="description" content="Access RagSense Lab to manage your AI-powered RAG chatbots..." />
+<meta name="keywords" content="RagSense Lab, AI chatbot login, RAG platform..." />
 <meta name="robots" content="noindex, nofollow" />
 ```
 
 #### Open Graph Tags (Social Media)
 ```html
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://lab.runit.in" />
-<meta property="og:title" content="RunIt Lab - AI-Powered RAG Platform" />
-<meta property="og:image" content="https://lab.runit.in/favicon_io/android-chrome-512x512.png" />
+<meta property="og:url" content="https://lab.ragsense.co" />
+<meta property="og:title" content="RagSense Lab - AI-Powered RAG Platform" />
+<meta property="og:image" content="https://lab.ragsense.co/favicon_io/android-chrome-512x512.png" />
 ```
 
 #### Twitter Card Tags
 ```html
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="RunIt Lab - AI-Powered RAG Platform" />
-<meta name="twitter:image" content="https://lab.runit.in/favicon_io/android-chrome-512x512.png" />
+<meta name="twitter:title" content="RagSense Lab - AI-Powered RAG Platform" />
+<meta name="twitter:image" content="https://lab.ragsense.co/favicon_io/android-chrome-512x512.png" />
 ```
 
 ### 2. Structured Data (JSON-LD)
@@ -52,12 +52,12 @@ Two structured data schemas are included:
 ```json
 {
   "@type": "SoftwareApplication",
-  "name": "RunIt Lab",
+  "name": "RagSense Lab",
   "applicationCategory": "BusinessApplication",
-  "url": "https://lab.runit.in",
+  "url": "https://lab.ragsense.co",
   "publisher": {
     "@type": "Organization",
-    "name": "RunIt",
+    "name": "RagSense",
     "url": "https://runit.in"
   }
 }
@@ -67,8 +67,8 @@ Two structured data schemas are included:
 ```json
 {
   "@type": "WebApplication",
-  "name": "RunIt Lab",
-  "url": "https://lab.runit.in",
+  "name": "RagSense Lab",
+  "url": "https://lab.ragsense.co",
   "applicationCategory": "BusinessApplication"
 }
 ```
@@ -90,7 +90,7 @@ Allow: /login$
 Allow: /signup$
 Disallow: /dashboard
 Disallow: /api
-Sitemap: https://lab.runit.in/sitemap.xml
+Sitemap: https://lab.ragsense.co/sitemap.xml
 ```
 
 ### 4. Sitemap
@@ -98,8 +98,8 @@ Sitemap: https://lab.runit.in/sitemap.xml
 Location: `/public/sitemap.xml`
 
 **Includes only public pages:**
-- https://lab.runit.in/login
-- https://lab.runit.in/signup
+- https://lab.ragsense.co/login
+- https://lab.ragsense.co/signup
 
 Dashboard pages are excluded as they're authenticated.
 
@@ -110,7 +110,7 @@ Location: `/public/.well-known/security.txt`
 Provides security contact information for responsible disclosure:
 ```
 Contact: mailto:no-reply@runit.in
-Canonical: https://lab.runit.in/.well-known/security.txt
+Canonical: https://lab.ragsense.co/.well-known/security.txt
 ```
 
 ### 6. Dynamic SEO Component
@@ -168,20 +168,20 @@ All favicon files are properly linked from `/public/favicon_io/`:
 ### Login Page (/login)
 ```javascript
 {
-  title: 'Sign In - RunIt Lab | Access Your AI Chatbot Dashboard',
-  description: 'Sign in to RunIt Lab to manage your AI-powered RAG chatbots...',
-  keywords: 'RunIt Lab login, AI chatbot dashboard, RAG platform signin',
-  canonical: 'https://lab.runit.in/login'
+  title: 'Sign In - RagSense Lab | Access Your AI Chatbot Dashboard',
+  description: 'Sign in to RagSense Lab to manage your AI-powered RAG chatbots...',
+  keywords: 'RagSense Lab login, AI chatbot dashboard, RAG platform signin',
+  canonical: 'https://lab.ragsense.co/login'
 }
 ```
 
 ### Signup Page (/signup)
 ```javascript
 {
-  title: 'Create Account - RunIt Lab | Start Building AI Chatbots',
-  description: 'Create your RunIt Lab account and start building intelligent AI chatbots...',
-  keywords: 'RunIt Lab signup, create AI chatbot account, RAG platform registration',
-  canonical: 'https://lab.runit.in/signup'
+  title: 'Create Account - RagSense Lab | Start Building AI Chatbots',
+  description: 'Create your RagSense Lab account and start building intelligent AI chatbots...',
+  keywords: 'RagSense Lab signup, create AI chatbot account, RAG platform registration',
+  canonical: 'https://lab.ragsense.co/signup'
 }
 ```
 
@@ -215,13 +215,13 @@ Test structured data: https://search.google.com/test/rich-results
 - LinkedIn: https://www.linkedin.com/post-inspector/
 
 ### 3. Robots.txt Testing
-Visit: https://lab.runit.in/robots.txt
+Visit: https://lab.ragsense.co/robots.txt
 
 ### 4. Sitemap Testing
-Visit: https://lab.runit.in/sitemap.xml
+Visit: https://lab.ragsense.co/sitemap.xml
 
 ### 5. Security.txt
-Visit: https://lab.runit.in/.well-known/security.txt
+Visit: https://lab.ragsense.co/.well-known/security.txt
 
 ## Maintenance
 
@@ -252,7 +252,7 @@ Visit: https://lab.runit.in/.well-known/security.txt
 ## Notes for Deployment
 
 1. Replace placeholder social media URLs in structured data
-2. Verify all URLs use correct domain (lab.runit.in)
+2. Verify all URLs use correct domain (lab.ragsense.co)
 3. Submit sitemap to Google Search Console
 4. Verify robots.txt is accessible
 5. Test meta tags with debugging tools
