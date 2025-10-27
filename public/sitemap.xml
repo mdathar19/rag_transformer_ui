@@ -6,7 +6,7 @@
 
   <!-- RagSense Lab - Only public pages (Login and Signup) -->
   <!-- Note: This is an authenticated application subdomain (lab.ragsense.co) -->
-  <!-- For main website sitemap, visit https://runit.in/sitemap.xml -->
+  <!-- For main website sitemap, visit https://ragsense.co/sitemap.xml -->
 
   <!-- Login Page -->
   <url>

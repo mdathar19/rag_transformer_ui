@@ -14,8 +14,8 @@ export function SEO({
   title = 'RagSense - AI-Powered RAG Chatbot Platform',
   description = 'Deploy intelligent AI chatbots in minutes with RagSense. Automatically index your website content and provide instant, accurate answers to customers 24/7.',
   keywords = 'AI chatbot, RAG platform, customer support automation, website chatbot, intelligent chatbot, AI customer service, automated support, conversational AI, RagSense, chatbot platform',
-  canonical = 'https://runit.in',
-  ogImage = 'https://runit.in/favicon_io/android-chrome-512x512.png',
+  canonical = 'https://ragsense.co',
+  ogImage = 'https://ragsense.co/favicon_io/android-chrome-512x512.png',
   ogType = 'website',
 }) {
   useEffect(() => {

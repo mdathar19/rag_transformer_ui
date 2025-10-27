@@ -58,7 +58,7 @@ Two structured data schemas are included:
   "publisher": {
     "@type": "Organization",
     "name": "RagSense",
-    "url": "https://runit.in"
+    "url": "https://ragsense.co"
   }
 }
 ```
@@ -262,4 +262,4 @@ Visit: https://lab.ragsense.co/.well-known/security.txt
 
 For SEO-related questions or improvements:
 - Email: no-reply@runit.in
-- Main Website: https://runit.in
+- Main Website: https://ragsense.co

@@ -219,7 +219,7 @@ JWT_SECRET=your-super-secret-jwt-key-change-this-in-production-12345
 JWT_EXPIRATION=7d
 ADMIN_EMAIL=admin@runit.in
 ADMIN_PASSWORD=admin123456
-ADMIN_COMPANY_DOMAIN=https://runit.in
+ADMIN_COMPANY_DOMAIN=https://ragsense.co
 ```
 
 ### Frontend (.env)
